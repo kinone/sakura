@@ -5,19 +5,37 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
 type Application struct {
-	cmds map[string]CommandInterface
+	cmds    map[string]CommandInterface
+	sigChan chan os.Signal
 }
 
 func NewApp() *Application {
 	cs := make(map[string]CommandInterface)
+	ch := make(chan os.Signal, 1)
+	signal.Notify(
+		ch,
+		syscall.SIGTERM,
+		syscall.SIGINT,
+		syscall.SIGHUP,
+		syscall.SIGKILL,
+		syscall.SIGUSR1,
+		syscall.SIGUSR2,
+	)
 
 	return &Application{
-		cmds: cs,
+		cmds:    cs,
+		sigChan: ch,
 	}
+}
+
+func (a *Application) SignalCh() <-chan os.Signal {
+	return a.sigChan
 }
 
 func (a *Application) AddCommand(c CommandInterface) {
