@@ -47,14 +47,16 @@ func (a *Application) SigCh() <-chan os.Signal {
 	return a.sigC
 }
 
-func (a *Application) HandleSignal(f func(), s ...os.Signal) {
+func (a *Application) HandleSignal(f func(), s ...os.Signal) *Application {
 	for _, v := range s {
 		a.sigHanlder[v] = append(a.sigHanlder[v], f)
 	}
+
+	return a
 }
 
-func (a *Application) HandleShutdown(f func()) {
-	a.HandleSignal(
+func (a *Application) HandleShutdown(f func()) *Application {
+	return a.HandleSignal(
 		f,
 		syscall.SIGTERM,
 		syscall.SIGINT,
@@ -78,7 +80,7 @@ func (a *Application) AddCommand(c CommandInterface) {
 	a.cmds[c.Name()] = c
 }
 
-func (a *Application) GoLoop(f func()) {
+func (a *Application) GoLoop(f func()) *Application {
 	a.wg.Add(1)
 	go func() {
 		defer a.wg.Done()
@@ -90,6 +92,8 @@ func (a *Application) GoLoop(f func()) {
 			f()
 		}
 	}()
+
+	return a
 }
 
 func (a *Application) shutdown() {
