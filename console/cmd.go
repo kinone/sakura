@@ -8,18 +8,14 @@ type CommandInterface interface {
 	Args() []*Argument
 }
 
-type Command struct {
+type CommandTraints struct {
 	args []*Argument
 }
 
-func (c *Command) AddArgument(arg *Argument) {
+func (c *CommandTraints) AddArgument(arg *Argument) {
 	c.args = append(c.args, arg)
 }
 
-func (c *Command) Args() []*Argument {
+func (c *CommandTraints) Args() []*Argument {
 	return c.args
 }
-
-func (c *Command) Configure()           {}
-func (c *Command) Execute() (err error) { return }
-func (c *Command) Name() (n string)     { return }
