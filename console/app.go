@@ -13,14 +13,14 @@ import (
 )
 
 type Application struct {
-	close int32
-	wg    sync.WaitGroup
-	sigC  chan os.Signal
-	cmds  map[string]CommandInterface
+	close      int32
+	wg         sync.WaitGroup
+	cmds       map[string]CommandInterface
+	sigC       chan os.Signal
+	sigHanlder map[os.Signal]func()
 }
 
 func NewApp() *Application {
-	cs := make(map[string]CommandInterface)
 	ch := make(chan os.Signal, 1)
 	signal.Notify(
 		ch,
@@ -33,13 +33,38 @@ func NewApp() *Application {
 	)
 
 	return &Application{
-		cmds: cs,
-		sigC: ch,
+		sigC:       ch,
+		cmds:       make(map[string]CommandInterface),
+		sigHanlder: make(map[os.Signal]func()),
 	}
 }
 
 func (a *Application) SigCh() <-chan os.Signal {
 	return a.sigC
+}
+
+func (a *Application) HandleSignal(f func(), s ...os.Signal) {
+	for _, v := range s {
+		a.sigHanlder[v] = f
+	}
+}
+
+func (a *Application) HandleShutdown(f func()) {
+	a.HandleSignal(
+		f,
+		syscall.SIGTERM,
+		syscall.SIGINT,
+		syscall.SIGHUP,
+		syscall.SIGKILL,
+	)
+}
+
+func (a *Application) SignalSinff() {
+	for s := range a.sigC {
+		if f, e := a.sigHanlder[s]; e {
+			f()
+		}
+	}
 }
 
 func (a *Application) AddCommand(c CommandInterface) {
