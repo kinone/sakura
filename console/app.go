@@ -6,13 +6,17 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 )
 
 type Application struct {
-	cmds    map[string]CommandInterface
-	sigChan chan os.Signal
+	close int32
+	wg    sync.WaitGroup
+	sigC  chan os.Signal
+	cmds  map[string]CommandInterface
 }
 
 func NewApp() *Application {
@@ -29,17 +33,38 @@ func NewApp() *Application {
 	)
 
 	return &Application{
-		cmds:    cs,
-		sigChan: ch,
+		cmds: cs,
+		sigC: ch,
 	}
 }
 
-func (a *Application) SignalCh() <-chan os.Signal {
-	return a.sigChan
+func (a *Application) SigCh() <-chan os.Signal {
+	return a.sigC
 }
 
 func (a *Application) AddCommand(c CommandInterface) {
+	c.SetApp(a)
 	a.cmds[c.Name()] = c
+}
+
+func (a *Application) GoLoop(f func()) {
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		for {
+			if atomic.LoadInt32(&a.close) == 1 {
+				return
+			}
+
+			f()
+		}
+	}()
+}
+
+func (a *Application) Shutdown() {
+	atomic.StoreInt32(&a.close, 1)
+	a.wg.Wait()
+	close(a.sigC)
 }
 
 func (a *Application) Run() (err error) {

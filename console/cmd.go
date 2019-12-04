@@ -6,16 +6,27 @@ type CommandInterface interface {
 	Name() string
 	AddArgument(arg *Argument)
 	Args() []*Argument
+	SetApp(a *Application)
+	App() *Application
 }
 
-type CommandTraints struct {
+type CommandTraits struct {
+	app  *Application
 	args []*Argument
 }
 
-func (c *CommandTraints) AddArgument(arg *Argument) {
+func (c *CommandTraits) AddArgument(arg *Argument) {
 	c.args = append(c.args, arg)
 }
 
-func (c *CommandTraints) Args() []*Argument {
+func (c *CommandTraits) Args() []*Argument {
 	return c.args
+}
+
+func (c *CommandTraits) SetApp(a *Application) {
+	c.app = a
+}
+
+func (c *CommandTraits) App() *Application {
+	return c.app
 }
