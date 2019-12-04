@@ -17,10 +17,10 @@ type Application struct {
 	wg         sync.WaitGroup
 	cmds       map[string]CommandInterface
 	sigC       chan os.Signal
-	sigHanlder map[os.Signal]func()
+	sigHanlder map[os.Signal][]func()
 }
 
-func NewApp() *Application {
+func NewApp() (a *Application) {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(
 		ch,
@@ -32,11 +32,15 @@ func NewApp() *Application {
 		syscall.SIGUSR2,
 	)
 
-	return &Application{
+	a = &Application{
 		sigC:       ch,
 		cmds:       make(map[string]CommandInterface),
-		sigHanlder: make(map[os.Signal]func()),
+		sigHanlder: make(map[os.Signal][]func()),
 	}
+
+	a.HandleShutdown(a.shutdown)
+
+	return
 }
 
 func (a *Application) SigCh() <-chan os.Signal {
@@ -45,7 +49,7 @@ func (a *Application) SigCh() <-chan os.Signal {
 
 func (a *Application) HandleSignal(f func(), s ...os.Signal) {
 	for _, v := range s {
-		a.sigHanlder[v] = f
+		a.sigHanlder[v] = append(a.sigHanlder[v], f)
 	}
 }
 
@@ -59,10 +63,12 @@ func (a *Application) HandleShutdown(f func()) {
 	)
 }
 
-func (a *Application) SignalSinff() {
+func (a *Application) Wait() {
 	for s := range a.sigC {
 		if f, e := a.sigHanlder[s]; e {
-			f()
+			for _, v := range f {
+				v()
+			}
 		}
 	}
 }
@@ -86,7 +92,7 @@ func (a *Application) GoLoop(f func()) {
 	}()
 }
 
-func (a *Application) Shutdown() {
+func (a *Application) shutdown() {
 	atomic.StoreInt32(&a.close, 1)
 	a.wg.Wait()
 	close(a.sigC)
