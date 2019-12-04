@@ -21,9 +21,8 @@ func (h *NullHandler) Reload() (err error)              { return }
 func (h *NullHandler) Close()                           {}
 
 type Record struct {
-	level  int
-	format string
-	args   []interface{}
+	level int
+	args  []interface{}
 }
 
 type Filter func(*Record) bool
@@ -61,7 +60,7 @@ func NewFileHandler(file string) (h *FileHandler) {
 }
 
 func (h *FileHandler) Log(level int, v ...interface{}) {
-	if !h.filter(&Record{level, "", v}) {
+	if !h.filter(&Record{level, v}) {
 		return
 	}
 
@@ -70,7 +69,7 @@ func (h *FileHandler) Log(level int, v ...interface{}) {
 }
 
 func (h *FileHandler) Logf(level int, format string, v ...interface{}) {
-	if !h.filter(&Record{level, "", v}) {
+	if !h.filter(&Record{level, v}) {
 		return
 	}
 
