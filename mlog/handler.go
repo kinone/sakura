@@ -13,27 +13,44 @@ type Handler interface {
 	Close()
 }
 
-type NullHandler struct {
-}
+type NullHandler struct{}
 
 func (h *NullHandler) Log(int, ...interface{})          {}
 func (h *NullHandler) Logf(int, string, ...interface{}) {}
 func (h *NullHandler) Reload() (err error)              { return }
 func (h *NullHandler) Close()                           {}
 
+type Record struct {
+	level  int
+	format string
+	args   []interface{}
+}
+
+type Filter func(*Record) bool
+
 type FileHandler struct {
 	filename string
-	filter   func(level int) bool
+	filter   Filter
 	driver   *log.Logger
 	fh       *os.File
+}
+
+func NoneFilter() Filter {
+	return func(*Record) bool {
+		return true
+	}
+}
+
+func LevelFilter(level int) Filter {
+	return func(r *Record) bool {
+		return r.level >= level
+	}
 }
 
 func NewFileHandler(file string) (h *FileHandler) {
 	h = &FileHandler{
 		filename: file,
-		filter: func(int) bool {
-			return true
-		},
+		filter:   NoneFilter(),
 	}
 
 	if err := h.init(); nil != err {
@@ -44,7 +61,7 @@ func NewFileHandler(file string) (h *FileHandler) {
 }
 
 func (h *FileHandler) Log(level int, v ...interface{}) {
-	if !h.filter(level) {
+	if !h.filter(&Record{level, "", v}) {
 		return
 	}
 
@@ -53,7 +70,7 @@ func (h *FileHandler) Log(level int, v ...interface{}) {
 }
 
 func (h *FileHandler) Logf(level int, format string, v ...interface{}) {
-	if !h.filter(level) {
+	if !h.filter(&Record{level, "", v}) {
 		return
 	}
 

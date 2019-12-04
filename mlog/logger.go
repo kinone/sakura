@@ -44,36 +44,35 @@ type Option struct {
 }
 
 type Logger struct {
-	h     Handler
-	level int
+	h Handler
 }
 
 func NewLogger(opt *Option) (l *Logger) {
-	level := ConvertLogLevel(opt.Level)
-
-	var handler Handler
+	if nil == opt {
+		opt = &Option{}
+	}
 
 	f := func() (h *FileHandler) {
 		h = NewFileHandler(opt.File)
-		h.filter = func(l int) bool {
-			return l >= level
-		}
+		l := ConvertLogLevel(opt.Level)
+		h.filter = LevelFilter(l)
 
 		return h
 	}
 
+	var handler Handler
+
 	switch opt.Type {
-	case TSmart:
-		handler = NewSmartHandler(f())
 	case TFile:
 		handler = f()
 	case TNull:
 		handler = &NullHandler{}
+	default:
+		handler = NewSmartHandler(f())
 	}
 
 	l = &Logger{
-		h:     handler,
-		level: level,
+		h: handler,
 	}
 
 	return
