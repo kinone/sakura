@@ -40,9 +40,10 @@ type LevelLogger interface {
 }
 
 type Option struct {
-	Type  int8
-	Level string
-	File  string
+	Type     int8
+	File     string
+	Levels   []string
+	Handlers []*HandlerOption
 }
 
 type Logger struct {
@@ -54,19 +55,28 @@ func NewLogger(opt *Option) (l *Logger) {
 		opt = &Option{}
 	}
 
-	var handler Handler
+	if opt.Type == 0 {
+		opt.Type = TSmart
+	}
+
+	l = &Logger{}
 
 	switch opt.Type {
 	case TFile:
-		handler = NewLevelhandler(opt.File, opt.Level)
-	case TNull:
-		handler = &NullHandler{}
-	default:
-		handler = NewSmartHandler(NewLevelhandler(opt.File, opt.Level))
-	}
-
-	l = &Logger{
-		handlers: []Handler{handler},
+		l.AddHandler(NewLevelHandler(opt.File, opt.Levels...))
+	case TSmart:
+		l.AddHandler(NewSmartHandler(NewLevelHandler(opt.File, opt.Levels...)))
+	case TMultiHandler:
+		for _, v := range opt.Handlers {
+			switch v.Type {
+			case "file":
+				l.AddHandler(NewLevelHandler(v.File, v.Levels...))
+			case "smart":
+				l.AddHandler(NewSmartHandler(NewLevelHandler(v.File, v.Levels...)))
+			default:
+				l.AddHandler(NewSmartHandler(NewLevelHandler(v.File, v.Levels...)))
+			}
+		}
 	}
 
 	return
@@ -78,19 +88,19 @@ func (l *Logger) AddHandler(h Handler) {
 
 func (l *Logger) Print(v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{NoLevel, "", v})
+		h.Log(&Record{LevelAll, "", v})
 	}
 }
 
 func (l *Logger) Println(v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{NoLevel, "", v})
+		h.Log(&Record{LevelAll, "", v})
 	}
 }
 
 func (l *Logger) Printf(format string, v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{NoLevel, format, v})
+		h.Log(&Record{LevelAll, format, v})
 	}
 }
 

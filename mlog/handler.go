@@ -14,38 +14,35 @@ type Record struct {
 	args   Args
 }
 
+type Filter func(*Record) bool
+
+func LevelFilter(level ...string) Filter {
+	var mask int
+
+	if len(level) == 0 {
+		mask = LevelAll
+	} else {
+		for _, v := range level {
+			mask |= ConvertLogLevel(v)
+		}
+	}
+
+	return func(r *Record) (e bool) {
+		e = r.level&mask > 0
+		return
+	}
+}
+
+type HandlerOption struct {
+	Type   string
+	File   string
+	Levels []string
+}
+
 type Handler interface {
 	Log(r *Record)
 	Reload() error
 	Close()
-}
-
-type NullHandler struct{}
-
-func (h *NullHandler) Log(*Record)         {}
-func (h *NullHandler) Reload() (err error) { return }
-func (h *NullHandler) Close()              {}
-
-type Filter func(*Record) bool
-
-func LevelFilter(level string) Filter {
-	l := ConvertLogLevel(level)
-
-	return func(r *Record) bool {
-		return r.level >= l
-	}
-}
-
-func LevelsFilter(levels []string) Filter {
-	ls := make(map[int]struct{})
-	for _, v := range levels {
-		ls[ConvertLogLevel(v)] = struct{}{}
-	}
-
-	return func(r *Record) (e bool) {
-		_, e = ls[r.level]
-		return
-	}
 }
 
 type FileHandler struct {
@@ -67,16 +64,9 @@ func NewFileHandler(file string) (h *FileHandler) {
 	return
 }
 
-func NewLevelhandler(file, level string) (h *FileHandler) {
+func NewLevelHandler(file string, level ...string) (h *FileHandler) {
 	h = NewFileHandler(file)
-	h.AddFilter(LevelFilter(level))
-
-	return
-}
-
-func NewLevelsHandler(file string, levels []string) (h *FileHandler) {
-	h = NewFileHandler(file)
-	h.AddFilter(LevelsFilter(levels))
+	h.AddFilter(LevelFilter(level...))
 
 	return
 }
