@@ -1,3 +1,3 @@
-module github.com/zhenhao/sakura
+module github.com/kinone/sakura
 
 go 1.13
