@@ -55,7 +55,7 @@ func NewLogger(opt *Option) (l *Logger) {
 	f := func() (h *FileHandler) {
 		h = NewFileHandler(opt.File)
 		l := ConvertLogLevel(opt.Level)
-		h.filter = LevelFilter(l)
+		h.AddFilter(LevelFilter(l))
 
 		return h
 	}

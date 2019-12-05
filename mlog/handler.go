@@ -27,29 +27,22 @@ type Record struct {
 
 type Filter func(*Record) bool
 
-type FileHandler struct {
-	filename string
-	filter   Filter
-	driver   *log.Logger
-	fh       *os.File
-}
-
-func NoneFilter() Filter {
-	return func(*Record) bool {
-		return true
-	}
-}
-
 func LevelFilter(level int) Filter {
 	return func(r *Record) bool {
 		return r.level >= level
 	}
 }
 
+type FileHandler struct {
+	filename string
+	filter   []Filter
+	driver   *log.Logger
+	fh       *os.File
+}
+
 func NewFileHandler(file string) (h *FileHandler) {
 	h = &FileHandler{
 		filename: file,
-		filter:   NoneFilter(),
 	}
 
 	if err := h.init(); nil != err {
@@ -59,9 +52,15 @@ func NewFileHandler(file string) (h *FileHandler) {
 	return
 }
 
+func (h *FileHandler) AddFilter(f ...Filter) {
+	h.filter = append(h.filter, f...)
+}
+
 func (h *FileHandler) Log(level int, v ...interface{}) {
-	if !h.filter(&Record{level, v}) {
-		return
+	for _, f := range h.filter {
+		if !f(&Record{level, v}) {
+			return
+		}
 	}
 
 	v = append([]interface{}{Prefix(level)}, v...)
@@ -69,8 +68,10 @@ func (h *FileHandler) Log(level int, v ...interface{}) {
 }
 
 func (h *FileHandler) Logf(level int, format string, v ...interface{}) {
-	if !h.filter(&Record{level, v}) {
-		return
+	for _, f := range h.filter {
+		if !f(&Record{level, v}) {
+			return
+		}
 	}
 
 	format = "%s " + format
