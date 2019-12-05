@@ -29,20 +29,20 @@ func (s Sakura) Email() string {
 	return "hit.zhenhao@gmail.com"
 }
 
-func LocalIP() ([]string, error) {
-	addrs, err := net.InterfaceAddrs()
-	if nil != err {
+func LocalIP() (ips []string, err error) {
+	var addrs []net.Addr
+
+	if addrs, err = net.InterfaceAddrs(); nil != err {
 		return nil, err
 	}
 
-	var ips []string
 	for _, addr := range addrs {
 		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
 			ips = append(ips, ipnet.IP.String())
 		}
 	}
 
-	return ips, nil
+	return
 }
 
 func HttpBuildQuery(params map[string][]string) string {
@@ -84,7 +84,7 @@ func SliceInterface(s interface{}) (r []interface{}) {
 	return
 }
 
-func ArrayIndex(niddle interface{}, s interface{}) int {
+func ArrayIndex(niddle, s interface{}) int {
 	slice := SliceInterface(s)
 
 	for k, v := range slice {
