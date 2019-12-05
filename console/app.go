@@ -27,7 +27,6 @@ func NewApp() (a *Application) {
 		syscall.SIGTERM,
 		syscall.SIGINT,
 		syscall.SIGHUP,
-		syscall.SIGKILL,
 		syscall.SIGUSR1,
 		syscall.SIGUSR2,
 	)
@@ -41,10 +40,6 @@ func NewApp() (a *Application) {
 	a.HandleShutdown(a.shutdown)
 
 	return
-}
-
-func (a *Application) SigCh() <-chan os.Signal {
-	return a.sigC
 }
 
 func (a *Application) HandleSignal(f func(), s ...os.Signal) *Application {
@@ -61,16 +56,13 @@ func (a *Application) HandleShutdown(f func()) *Application {
 		syscall.SIGTERM,
 		syscall.SIGINT,
 		syscall.SIGHUP,
-		syscall.SIGKILL,
 	)
 }
 
 func (a *Application) Wait() {
 	for s := range a.sigC {
-		if f, e := a.sigHanlder[s]; e {
-			for _, v := range f {
-				v()
-			}
+		for _, f := range a.sigHanlder[s] {
+			f()
 		}
 	}
 }
