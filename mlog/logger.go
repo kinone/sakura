@@ -79,79 +79,79 @@ func NewLogger(opt *Option) (l *Logger) {
 }
 
 func (l *Logger) Print(v ...interface{}) {
-	l.h.Log(NoLevel, v...)
+	l.h.Log(&Record{NoLevel, "", v})
 }
 
 func (l *Logger) Println(v ...interface{}) {
-	l.h.Log(NoLevel, v...)
+	l.h.Log(&Record{NoLevel, "", v})
 }
 
 func (l *Logger) Printf(format string, v ...interface{}) {
-	l.h.Logf(NoLevel, format, v...)
+	l.h.Log(&Record{NoLevel, format, v})
 }
 
 func (l *Logger) Debug(v ...interface{}) {
-	l.h.Log(Debug, v...)
+	l.h.Log(&Record{Debug, "", v})
 }
 
 func (l *Logger) Debugf(format string, v ...interface{}) {
-	l.h.Logf(Debug, format, v...)
+	l.h.Log(&Record{Debug, format, v})
 }
 
 func (l *Logger) Info(v ...interface{}) {
-	l.h.Log(Info, v...)
+	l.h.Log(&Record{Info, "", v})
 }
 
 func (l *Logger) Infof(format string, v ...interface{}) {
-	l.h.Logf(Info, format, v...)
+	l.h.Log(&Record{Info, format, v})
 }
 
 func (l *Logger) Notice(v ...interface{}) {
-	l.h.Log(Notice, v...)
+	l.h.Log(&Record{Notice, "", v})
 }
 
 func (l *Logger) Noticef(format string, v ...interface{}) {
-	l.h.Logf(Notice, format, v...)
+	l.h.Log(&Record{Notice, format, v})
 }
 
 func (l *Logger) Warning(v ...interface{}) {
-	l.h.Log(Warning, v...)
+	l.h.Log(&Record{Warning, "", v})
 }
 
 func (l *Logger) Warningf(format string, v ...interface{}) {
-	l.h.Logf(Warning, format, v...)
+	l.h.Log(&Record{Warning, format, v})
 }
 
 func (l *Logger) Error(v ...interface{}) {
-	l.h.Log(Error, v...)
+	l.h.Log(&Record{Error, "", v})
 }
 
 func (l *Logger) Errorf(format string, v ...interface{}) {
-	l.h.Logf(Error, format, v...)
+	l.h.Log(&Record{Error, format, v})
 }
 
 func (l *Logger) Alert(v ...interface{}) {
-	l.h.Log(Alert, v...)
+	l.h.Log(&Record{Alert, "", v})
 }
 
 func (l *Logger) Alertf(format string, v ...interface{}) {
-	l.h.Logf(Alert, format, v...)
+	l.h.Log(&Record{Alert, format, v})
 }
 
 func (l *Logger) Critical(v ...interface{}) {
-	l.h.Log(Critical, v...)
+	l.h.Log(&Record{Critical, "", v})
 }
 
 func (l *Logger) Criticalf(format string, v ...interface{}) {
-	l.h.Logf(Critical, format, v...)
+	l.h.Log(&Record{Critical, format, v})
 }
 
 func (l *Logger) Emergency(v ...interface{}) {
-	l.h.Log(Emergency, v...)
+	l.h.Log(&Record{Emergency, "", v})
 }
 
 func (l *Logger) Emergencyf(format string, v ...interface{}) {
-	l.h.Logf(Emergency, format, v...)
+	l.h.Log(&Record{Emergency, format, v})
 }
 
 func (l *Logger) Reload() error {

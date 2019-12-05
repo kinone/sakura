@@ -6,24 +6,25 @@ import (
 	"sync"
 )
 
+type Args []interface{}
+
+type Record struct {
+	level  int
+	format string
+	args   Args
+}
+
 type Handler interface {
-	Log(int, ...interface{})
-	Logf(int, string, ...interface{})
+	Log(r *Record)
 	Reload() error
 	Close()
 }
 
 type NullHandler struct{}
 
-func (h *NullHandler) Log(int, ...interface{})          {}
-func (h *NullHandler) Logf(int, string, ...interface{}) {}
-func (h *NullHandler) Reload() (err error)              { return }
-func (h *NullHandler) Close()                           {}
-
-type Record struct {
-	level int
-	args  []interface{}
-}
+func (h *NullHandler) Log(*Record)         {}
+func (h *NullHandler) Reload() (err error) { return }
+func (h *NullHandler) Close()              {}
 
 type Filter func(*Record) bool
 
@@ -56,27 +57,20 @@ func (h *FileHandler) AddFilter(f ...Filter) {
 	h.filter = append(h.filter, f...)
 }
 
-func (h *FileHandler) Log(level int, v ...interface{}) {
+func (h *FileHandler) Log(r *Record) {
 	for _, f := range h.filter {
-		if !f(&Record{level, v}) {
+		if !f(r) {
 			return
 		}
 	}
 
-	v = append([]interface{}{Prefix(level)}, v...)
-	h.driver.Println(v...)
-}
-
-func (h *FileHandler) Logf(level int, format string, v ...interface{}) {
-	for _, f := range h.filter {
-		if !f(&Record{level, v}) {
-			return
-		}
+	v := append([]interface{}{Prefix(r.level)}, r.args...)
+	if len(r.format) > 0 {
+		format := "%s " + r.format
+		h.driver.Printf(format, v...)
+	} else {
+		h.driver.Println(v...)
 	}
-
-	format = "%s " + format
-	v = append([]interface{}{Prefix(level)}, v...)
-	h.driver.Printf(format, v...)
 }
 
 func (h *FileHandler) Reload() (err error) {
@@ -134,25 +128,19 @@ func NewSmartHandler(handler Handler) (h *SmartHandler) {
 
 func (h *SmartHandler) consumer() {
 	defer func() {
-		h.Handler.Log(Debug, "log consumer stoped")
+		h.Handler.Log(&Record{level: Debug, args: Args{"log consumer stoped"}})
 		h.wg.Done()
 	}()
 
-	h.Handler.Log(Debug, "log consumer started")
+	h.Handler.Log(&Record{level: Debug, args: Args{"log consumer started"}})
 	for f := range h.ch {
 		f()
 	}
 }
 
-func (h *SmartHandler) Log(level int, v ...interface{}) {
+func (h *SmartHandler) Log(r *Record) {
 	h.ch <- func() {
-		h.Handler.Log(level, v...)
-	}
-}
-
-func (h *SmartHandler) Logf(level int, format string, v ...interface{}) {
-	h.ch <- func() {
-		h.Handler.Logf(level, format, v...)
+		h.Handler.Log(r)
 	}
 }
 
