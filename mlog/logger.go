@@ -68,13 +68,14 @@ func NewLogger(opt *Option) (l *Logger) {
 		l.AddHandler(NewSmartHandler(NewLevelHandler(opt.File, opt.Levels...)))
 	case TMultiHandler:
 		for _, v := range opt.Handlers {
+			h := NewLevelHandler(v.File, v.Levels...)
 			switch v.Type {
 			case "file":
-				l.AddHandler(NewLevelHandler(v.File, v.Levels...))
+				l.AddHandler(h)
 			case "smart":
-				l.AddHandler(NewSmartHandler(NewLevelHandler(v.File, v.Levels...)))
+				l.AddHandler(NewSmartHandler(h))
 			default:
-				l.AddHandler(NewSmartHandler(NewLevelHandler(v.File, v.Levels...)))
+				l.AddHandler(NewSmartHandler(h))
 			}
 		}
 	}
