@@ -109,14 +109,14 @@ func (h *FileHandler) init() (err error) {
 
 type SmartHandler struct {
 	Handler
-	ch chan func()
+	ch chan *Record
 	wg *sync.WaitGroup
 }
 
 func NewSmartHandler(handler Handler) (h *SmartHandler) {
 	h = &SmartHandler{
 		Handler: handler,
-		ch:      make(chan func()),
+		ch:      make(chan *Record),
 		wg:      new(sync.WaitGroup),
 	}
 
@@ -133,15 +133,13 @@ func (h *SmartHandler) consumer() {
 	}()
 
 	h.Handler.Log(&Record{level: Debug, args: Args{"log consumer started"}})
-	for f := range h.ch {
-		f()
+	for r := range h.ch {
+		h.Handler.Log(r)
 	}
 }
 
 func (h *SmartHandler) Log(r *Record) {
-	h.ch <- func() {
-		h.Handler.Log(r)
-	}
+	h.ch <- r
 }
 
 func (h *SmartHandler) Close() {
