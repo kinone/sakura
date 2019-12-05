@@ -1,5 +1,15 @@
 package sakura
 
+import (
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
+	"net"
+	"net/url"
+	"reflect"
+	"strings"
+)
+
 type Sakura struct {
 }
 
@@ -17,4 +27,71 @@ func (s Sakura) Author() string {
 
 func (s Sakura) Email() string {
 	return "hit.zhenhao@gmail.com"
+}
+
+func LocalIP() ([]string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if nil != err {
+		return nil, err
+	}
+
+	var ips []string
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
+			ips = append(ips, ipnet.IP.String())
+		}
+	}
+
+	return ips, nil
+}
+
+func HttpBuildQuery(params map[string][]string) string {
+	var seg []string
+
+	for k, v := range params {
+		switch len(v) {
+		case 0:
+			seg = append(seg, url.QueryEscape(k)+"=")
+		case 1:
+			seg = append(seg, strings.Join([]string{url.QueryEscape(k), url.QueryEscape(v[0])}, "="))
+		default:
+			for idx, vv := range v {
+				kk := fmt.Sprintf("%s[%d]", k, idx)
+				seg = append(seg, strings.Join([]string{url.QueryEscape(kk), url.QueryEscape(vv)}, "="))
+			}
+		}
+	}
+
+	return strings.Join(seg, "&")
+}
+
+func MD5(str string) string {
+	bs := md5.Sum([]byte(str))
+	return hex.EncodeToString(bs[:])
+}
+
+func SliceInterface(s interface{}) (r []interface{}) {
+	rs := reflect.ValueOf(s)
+	kind := rs.Kind()
+	if kind != reflect.Slice && kind != reflect.Array {
+		panic(&reflect.ValueError{Method: "gohelper.utils.SliceInterface", Kind: kind})
+	}
+
+	for i := 0; i < rs.Len(); i++ {
+		r = append(r, rs.Index(i).Interface())
+	}
+
+	return
+}
+
+func ArrayIndex(niddle interface{}, s interface{}) int {
+	slice := SliceInterface(s)
+
+	for k, v := range slice {
+		if reflect.DeepEqual(niddle, v) {
+			return k
+		}
+	}
+
+	return -1
 }

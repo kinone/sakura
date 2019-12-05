@@ -48,8 +48,7 @@ var (
 func ConvertLogLevel(level string) (l int) {
 	var e bool
 
-	l, e = levelString[level]
-	if !e {
+	if l, e = levelString[level]; !e {
 		return
 	}
 
