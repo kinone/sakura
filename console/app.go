@@ -107,7 +107,7 @@ func (a *Application) Run() (err error) {
 	)
 
 	if c, e = a.cmds[name]; !e {
-		err = errors.New(fmt.Sprintf("no command %s found", name))
+		return errors.New(fmt.Sprintf("no command named <%s> found", name))
 	}
 
 	c.Configure()

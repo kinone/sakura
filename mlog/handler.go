@@ -28,9 +28,23 @@ func (h *NullHandler) Close()              {}
 
 type Filter func(*Record) bool
 
-func LevelFilter(level int) Filter {
+func LevelFilter(level string) Filter {
+	l := ConvertLogLevel(level)
+
 	return func(r *Record) bool {
-		return r.level >= level
+		return r.level >= l
+	}
+}
+
+func LevelsFilter(levels []string) Filter {
+	ls := make(map[int]struct{})
+	for _, v := range levels {
+		ls[ConvertLogLevel(v)] = struct{}{}
+	}
+
+	return func(r *Record) (e bool) {
+		_, e = ls[r.level]
+		return
 	}
 }
 
@@ -49,6 +63,20 @@ func NewFileHandler(file string) (h *FileHandler) {
 	if err := h.init(); nil != err {
 		panic(err)
 	}
+
+	return
+}
+
+func NewLevelhandler(file, level string) (h *FileHandler) {
+	h = NewFileHandler(file)
+	h.AddFilter(LevelFilter(level))
+
+	return
+}
+
+func NewLevelsHandler(file string, levels []string) (h *FileHandler) {
+	h = NewFileHandler(file)
+	h.AddFilter(LevelsFilter(levels))
 
 	return
 }

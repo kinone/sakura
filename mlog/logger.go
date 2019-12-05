@@ -35,6 +35,8 @@ type LevelLogger interface {
 
 	Reload() error
 	Close()
+
+	AddHandler(Handler)
 }
 
 type Option struct {
@@ -44,7 +46,7 @@ type Option struct {
 }
 
 type Logger struct {
-	h Handler
+	handlers []Handler
 }
 
 func NewLogger(opt *Option) (l *Logger) {
@@ -52,112 +54,154 @@ func NewLogger(opt *Option) (l *Logger) {
 		opt = &Option{}
 	}
 
-	f := func() (h *FileHandler) {
-		h = NewFileHandler(opt.File)
-		l := ConvertLogLevel(opt.Level)
-		h.AddFilter(LevelFilter(l))
-
-		return h
-	}
-
 	var handler Handler
 
 	switch opt.Type {
 	case TFile:
-		handler = f()
+		handler = NewLevelhandler(opt.File, opt.Level)
 	case TNull:
 		handler = &NullHandler{}
 	default:
-		handler = NewSmartHandler(f())
+		handler = NewSmartHandler(NewLevelhandler(opt.File, opt.Level))
 	}
 
 	l = &Logger{
-		h: handler,
+		handlers: []Handler{handler},
 	}
 
 	return
 }
 
+func (l *Logger) AddHandler(h Handler) {
+	l.handlers = append(l.handlers, h)
+}
+
 func (l *Logger) Print(v ...interface{}) {
-	l.h.Log(&Record{NoLevel, "", v})
+	for _, h := range l.handlers {
+		h.Log(&Record{NoLevel, "", v})
+	}
 }
 
 func (l *Logger) Println(v ...interface{}) {
-	l.h.Log(&Record{NoLevel, "", v})
+	for _, h := range l.handlers {
+		h.Log(&Record{NoLevel, "", v})
+	}
 }
 
 func (l *Logger) Printf(format string, v ...interface{}) {
-	l.h.Log(&Record{NoLevel, format, v})
+	for _, h := range l.handlers {
+		h.Log(&Record{NoLevel, format, v})
+	}
 }
 
 func (l *Logger) Debug(v ...interface{}) {
-	l.h.Log(&Record{Debug, "", v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Debug, "", v})
+	}
 }
 
 func (l *Logger) Debugf(format string, v ...interface{}) {
-	l.h.Log(&Record{Debug, format, v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Debug, format, v})
+	}
 }
 
 func (l *Logger) Info(v ...interface{}) {
-	l.h.Log(&Record{Info, "", v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Info, "", v})
+	}
 }
 
 func (l *Logger) Infof(format string, v ...interface{}) {
-	l.h.Log(&Record{Info, format, v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Info, format, v})
+	}
 }
 
 func (l *Logger) Notice(v ...interface{}) {
-	l.h.Log(&Record{Notice, "", v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Notice, "", v})
+	}
 }
 
 func (l *Logger) Noticef(format string, v ...interface{}) {
-	l.h.Log(&Record{Notice, format, v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Notice, format, v})
+	}
 }
 
 func (l *Logger) Warning(v ...interface{}) {
-	l.h.Log(&Record{Warning, "", v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Warning, "", v})
+	}
 }
 
 func (l *Logger) Warningf(format string, v ...interface{}) {
-	l.h.Log(&Record{Warning, format, v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Warning, format, v})
+	}
 }
 
 func (l *Logger) Error(v ...interface{}) {
-	l.h.Log(&Record{Error, "", v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Error, "", v})
+	}
 }
 
 func (l *Logger) Errorf(format string, v ...interface{}) {
-	l.h.Log(&Record{Error, format, v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Error, format, v})
+	}
 }
 
 func (l *Logger) Alert(v ...interface{}) {
-	l.h.Log(&Record{Alert, "", v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Alert, "", v})
+	}
 }
 
 func (l *Logger) Alertf(format string, v ...interface{}) {
-	l.h.Log(&Record{Alert, format, v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Alert, format, v})
+	}
 }
 
 func (l *Logger) Critical(v ...interface{}) {
-	l.h.Log(&Record{Critical, "", v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Critical, "", v})
+	}
 }
 
 func (l *Logger) Criticalf(format string, v ...interface{}) {
-	l.h.Log(&Record{Critical, format, v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Critical, format, v})
+	}
 }
 
 func (l *Logger) Emergency(v ...interface{}) {
-	l.h.Log(&Record{Emergency, "", v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Emergency, "", v})
+	}
 }
 
 func (l *Logger) Emergencyf(format string, v ...interface{}) {
-	l.h.Log(&Record{Emergency, format, v})
+	for _, h := range l.handlers {
+		h.Log(&Record{Emergency, format, v})
+	}
 }
 
-func (l *Logger) Reload() error {
-	return l.h.Reload()
+func (l *Logger) Reload() (err error) {
+	for _, h := range l.handlers {
+		if err = h.Reload(); nil != err {
+			return
+		}
+	}
+
+	return
 }
 
 func (l *Logger) Close() {
-	l.h.Close()
+	for _, h := range l.handlers {
+		h.Close()
+	}
 }
