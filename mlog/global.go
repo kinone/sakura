@@ -14,7 +14,7 @@ const (
 const LevelAll = Debug | Info | Notice | Warning | Error | Critical | Alert | Emergency
 
 const (
-	_ = iota
+	_ int8 = iota
 	TFile
 	TSmart
 	TMultiHandler
