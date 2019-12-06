@@ -1,8 +1,12 @@
 package mlog
 
+import "strings"
+
 type Level uint8
 
 func NewLevel(level string) (l Level) {
+	level = strings.ToLower(level)
+
 	return levelString[level]
 }
 
@@ -46,11 +50,11 @@ var (
 	levelString = map[string]Level{
 		"debug":     Debug,
 		"info":      Info,
-		"info+":     LevelAll & ^Debug,
+		"info+":     ^Debug,
 		"notice":    Notice,
-		"notice+":   LevelAll & ^Debug & ^Info,
+		"notice+":   ^Debug & ^Info,
 		"warning":   Warning,
-		"warning+":  LevelAll & ^Debug & ^Info & ^Notice,
+		"warning+":  ^Debug & ^Info & ^Notice,
 		"error":     Error,
 		"error+":    Error | Critical | Alert | Emergency,
 		"critical":  Critical,
