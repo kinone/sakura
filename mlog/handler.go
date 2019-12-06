@@ -9,7 +9,7 @@ import (
 type Args []interface{}
 
 type Record struct {
-	level  int
+	level  Level
 	format string
 	args   Args
 }
@@ -17,13 +17,13 @@ type Record struct {
 type Filter func(*Record) bool
 
 func LevelFilter(level ...string) Filter {
-	var mask int
+	var mask Level
 
 	if len(level) == 0 {
 		mask = LevelAll
 	} else {
 		for _, v := range level {
-			mask |= ConvertLogLevel(v)
+			mask |= NewLevel(v)
 		}
 	}
 
@@ -82,7 +82,7 @@ func (h *FileHandler) Log(r *Record) {
 		}
 	}
 
-	v := append([]interface{}{Prefix(r.level)}, r.args...)
+	v := append([]interface{}{r.level.String()}, r.args...)
 	if len(r.format) > 0 {
 		format := "%s " + r.format
 		h.driver.Printf(format, v...)

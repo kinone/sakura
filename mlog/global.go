@@ -1,7 +1,23 @@
 package mlog
 
+type Level uint8
+
+func NewLevel(level string) (l Level) {
+	var e bool
+
+	if l, e = levelString[level]; !e {
+		return
+	}
+
+	return
+}
+
+func (l Level) String() string {
+	return levelPrefix[l]
+}
+
 const (
-	Debug = 1 << iota
+	Debug Level = 1 << iota
 	Info
 	Notice
 	Warning
@@ -11,7 +27,7 @@ const (
 	Emergency
 )
 
-const LevelAll = Debug | Info | Notice | Warning | Error | Critical | Alert | Emergency
+const LevelAll = ^Level(0)
 
 const (
 	_ int8 = iota
@@ -21,7 +37,7 @@ const (
 )
 
 var (
-	levelPrefix = map[int]string{
+	levelPrefix = map[Level]string{
 		Debug:     "[DEBUG]",
 		Info:      "[INFO]",
 		Notice:    "[NOTICE]",
@@ -33,7 +49,7 @@ var (
 		LevelAll:  "[LA]",
 	}
 
-	levelString = map[string]int{
+	levelString = map[string]Level{
 		"debug":     Debug,
 		"info":      Info,
 		"info+":     LevelAll & ^Debug,
@@ -48,17 +64,3 @@ var (
 		"emergency": Emergency,
 	}
 )
-
-func ConvertLogLevel(level string) (l int) {
-	var e bool
-
-	if l, e = levelString[level]; !e {
-		return
-	}
-
-	return l
-}
-
-func Prefix(l int) string {
-	return levelPrefix[l]
-}
