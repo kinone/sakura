@@ -3,13 +3,7 @@ package mlog
 type Level uint8
 
 func NewLevel(level string) (l Level) {
-	var e bool
-
-	if l, e = levelString[level]; !e {
-		return
-	}
-
-	return
+	return levelString[level]
 }
 
 func (l Level) String() string {
