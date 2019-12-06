@@ -36,9 +36,13 @@ var (
 	levelString = map[string]int{
 		"debug":     Debug,
 		"info":      Info,
+		"info+":     LevelAll & ^Debug,
 		"notice":    Notice,
+		"notice+":   LevelAll & ^Debug & ^Info,
 		"warning":   Warning,
+		"warning+":  LevelAll & ^Debug & ^Info & ^Notice,
 		"error":     Error,
+		"error+":    Error | Critical | Alert | Emergency,
 		"critical":  Critical,
 		"alert":     Alert,
 		"emergency": Emergency,
