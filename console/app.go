@@ -37,8 +37,6 @@ func NewApp() (a *Application) {
 		sigHanlder: make(map[os.Signal][]func()),
 	}
 
-	a.HandleShutdown(a.shutdown)
-
 	return
 }
 
@@ -60,6 +58,8 @@ func (a *Application) HandleShutdown(f func()) *Application {
 }
 
 func (a *Application) Wait() {
+	a.HandleShutdown(a.shutdown)
+
 	for s := range a.sigC {
 		for _, f := range a.sigHanlder[s] {
 			f()
@@ -70,6 +70,16 @@ func (a *Application) Wait() {
 func (a *Application) AddCommand(c CommandInterface) {
 	c.SetApp(a)
 	a.cmds[c.Name()] = c
+}
+
+func (a *Application) Go(f func()) *Application {
+	a.wg.Add(1)
+	go func() {
+		defer a.wg.Done()
+		f()
+	}()
+
+	return a
 }
 
 func (a *Application) GoLoop(f func()) *Application {
