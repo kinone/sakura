@@ -15,7 +15,7 @@ type Application struct {
 
 func NewApp() (a *Application) {
 	a = &Application{
-		Wrapper: NewWapper(),
+		Wrapper: NewWrapper(),
 		cmds:    make(map[string]CommandInterface),
 	}
 

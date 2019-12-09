@@ -15,7 +15,7 @@ type Wrapper struct {
 	close      int32
 }
 
-func NewWapper() (w *Wrapper) {
+func NewWrapper() (w *Wrapper) {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(
 		ch,
