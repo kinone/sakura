@@ -65,7 +65,7 @@ func NewLogger(opt *Option) (l *Logger) {
 		opt.Type = TSmart
 	}
 
-	l = &Logger{}
+	l = NewNullLogger()
 
 	switch opt.Type {
 	case TFile:
