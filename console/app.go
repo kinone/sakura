@@ -5,103 +5,26 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"os/signal"
-	"sync"
-	"sync/atomic"
-	"syscall"
 	"time"
 )
 
 type Application struct {
-	close      int32
-	wg         sync.WaitGroup
-	cmds       map[string]CommandInterface
-	sigC       chan os.Signal
-	sigHanlder map[os.Signal][]func()
+	*Wrapper
+	cmds map[string]CommandInterface
 }
 
 func NewApp() (a *Application) {
-	ch := make(chan os.Signal, 1)
-	signal.Notify(
-		ch,
-		syscall.SIGTERM,
-		syscall.SIGINT,
-		syscall.SIGHUP,
-		syscall.SIGUSR1,
-		syscall.SIGUSR2,
-	)
-
 	a = &Application{
-		sigC:       ch,
-		cmds:       make(map[string]CommandInterface),
-		sigHanlder: make(map[os.Signal][]func()),
+		Wrapper: NewWapper(),
+		cmds:    make(map[string]CommandInterface),
 	}
 
 	return
 }
 
-func (a *Application) HandleSignal(f func(), s ...os.Signal) *Application {
-	for _, v := range s {
-		a.sigHanlder[v] = append(a.sigHanlder[v], f)
-	}
-
-	return a
-}
-
-func (a *Application) HandleShutdown(f func()) *Application {
-	return a.HandleSignal(
-		f,
-		syscall.SIGTERM,
-		syscall.SIGINT,
-		syscall.SIGHUP,
-	)
-}
-
-func (a *Application) Wait() {
-	a.HandleShutdown(a.shutdown)
-
-	for s := range a.sigC {
-		for _, f := range a.sigHanlder[s] {
-			f()
-		}
-	}
-}
-
 func (a *Application) AddCommand(c CommandInterface) {
 	c.SetApp(a)
 	a.cmds[c.Name()] = c
-}
-
-func (a *Application) Go(f func(args ...interface{}), args ...interface{}) *Application {
-	a.wg.Add(1)
-	go func() {
-		defer a.wg.Done()
-		f(args...)
-	}()
-
-	return a
-}
-
-func (a *Application) GoLoop(f func()) *Application {
-	a.wg.Add(1)
-	go func() {
-		defer a.wg.Done()
-		for {
-			if atomic.LoadInt32(&a.close) == 1 {
-				return
-			}
-
-			f()
-		}
-	}()
-
-	return a
-}
-
-func (a *Application) shutdown() {
-	atomic.StoreInt32(&a.close, 1)
-	a.wg.Wait()
-	close(a.sigC)
 }
 
 func (a *Application) Run() (err error) {
