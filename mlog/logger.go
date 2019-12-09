@@ -50,6 +50,12 @@ type Logger struct {
 	handlers []Handler
 }
 
+func NewNullLogger() (l *Logger) {
+	l = &Logger{}
+
+	return
+}
+
 func NewLogger(opt *Option) (l *Logger) {
 	if nil == opt {
 		opt = &Option{}
