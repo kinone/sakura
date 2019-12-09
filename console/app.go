@@ -72,11 +72,11 @@ func (a *Application) AddCommand(c CommandInterface) {
 	a.cmds[c.Name()] = c
 }
 
-func (a *Application) Go(f func()) *Application {
+func (a *Application) Go(f func(args ...interface{}), args ...interface{}) *Application {
 	a.wg.Add(1)
 	go func() {
 		defer a.wg.Done()
-		f()
+		f(args...)
 	}()
 
 	return a
