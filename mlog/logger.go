@@ -84,6 +84,10 @@ func NewLogger(opt *Option) (l *Logger) {
 				l.AddHandler(NewSmartHandler(h))
 			}
 		}
+	case TBare:
+		l.AddHandler(NewBareHandler(opt.File))
+	case TSmartBare:
+		l.AddHandler(NewSmartHandler(NewBareHandler(opt.File)))
 	}
 
 	return

@@ -46,10 +46,11 @@ type Handler interface {
 }
 
 type FileHandler struct {
-	filename string
-	filter   []Filter
-	driver   *log.Logger
-	fh       *os.File
+	filename  string
+	filter    []Filter
+	driver    *log.Logger
+	fh        *os.File
+	showLevel bool
 }
 
 func NewFileHandler(file string) (h *FileHandler) {
@@ -64,9 +65,17 @@ func NewFileHandler(file string) (h *FileHandler) {
 	return
 }
 
+func NewBareHandler(file string) (h *FileHandler) {
+	h = NewFileHandler(file)
+	h.driver.SetFlags(0)
+
+	return
+}
+
 func NewLevelHandler(file string, level ...string) (h *FileHandler) {
 	h = NewFileHandler(file)
 	h.AddFilter(LevelFilter(level...))
+	h.showLevel = true
 
 	return
 }
@@ -82,9 +91,19 @@ func (h *FileHandler) Log(r *Record) {
 		}
 	}
 
-	v := append([]interface{}{r.level.String()}, r.args...)
-	if len(r.format) > 0 {
-		format := "%s " + r.format
+	var (
+		v      = r.args
+		format = r.format
+	)
+
+	if h.showLevel {
+		v = append([]interface{}{r.level.String()}, v...)
+		if len(format) > 0 {
+			format = "%s " + r.format
+		}
+	}
+
+	if len(format) > 0 {
 		h.driver.Printf(format, v...)
 	} else {
 		h.driver.Println(v...)
@@ -145,12 +164,9 @@ func NewSmartHandler(handler Handler) (h *SmartHandler) {
 }
 
 func (h *SmartHandler) consumer() {
-	defer func() {
-		h.Handler.Log(&Record{level: Debug, args: Args{"log consumer stoped"}})
-		h.wg.Done()
-	}()
-
-	h.Handler.Log(&Record{level: Debug, args: Args{"log consumer started"}})
+	defer h.wg.Done()
+	//defer h.Handler.Log(&Record{level: Debug, args: Args{"log consumer stoped"}})
+	//h.Handler.Log(&Record{level: Debug, args: Args{"log consumer started"}})
 	for r := range h.ch {
 		h.Handler.Log(r)
 	}

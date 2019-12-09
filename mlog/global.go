@@ -32,6 +32,8 @@ const (
 	TFile
 	TSmart
 	TMultiHandler
+	TBare
+	TSmartBare
 )
 
 var (
