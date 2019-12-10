@@ -1,6 +1,9 @@
 package mlog
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+)
 
 type Args []interface{}
 
@@ -10,8 +13,22 @@ type Record struct {
 	args   Args
 }
 
+func NewRecord(l Level, f string, args Args) *Record {
+	return &Record{l, f, args}
+}
+
 func (r *Record) Args() Args {
 	return r.args
+}
+
+func (r *Record) Level() string {
+	l := r.level.String()
+
+	return strings.ToLower(l[1 : len(l)-1])
+}
+
+func (r *Record) Format() string {
+	return r.format
 }
 
 func (r *Record) SetFormat(f string) {
@@ -20,6 +37,10 @@ func (r *Record) SetFormat(f string) {
 
 func (r *Record) SetArgs(args Args) {
 	r.args = args
+}
+
+func (r *Record) SetLevel(l string) {
+	r.level = NewLevel(l)
 }
 
 func (r *Record) Json() *Record {

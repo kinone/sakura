@@ -98,115 +98,115 @@ func (l *Logger) AddHandler(h Handler) {
 
 func (l *Logger) Print(v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{LevelAll, "", v})
+		h.Log(NewRecord(LevelAll, "", v))
 	}
 }
 
 func (l *Logger) Println(v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{LevelAll, "", v})
+		h.Log(NewRecord(LevelAll, "", v))
 	}
 }
 
 func (l *Logger) Printf(format string, v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{LevelAll, format, v})
+		h.Log(NewRecord(LevelAll, format, v))
 	}
 }
 
 func (l *Logger) Debug(v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Debug, "", v})
+		h.Log(NewRecord(Debug, "", v))
 	}
 }
 
 func (l *Logger) Debugf(format string, v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Debug, format, v})
+		h.Log(NewRecord(Debug, format, v))
 	}
 }
 
 func (l *Logger) Info(v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Info, "", v})
+		h.Log(NewRecord(Info, "", v))
 	}
 }
 
 func (l *Logger) Infof(format string, v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Info, format, v})
+		h.Log(NewRecord(Info, format, v))
 	}
 }
 
 func (l *Logger) Notice(v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Notice, "", v})
+		h.Log(NewRecord(Notice, "", v))
 	}
 }
 
 func (l *Logger) Noticef(format string, v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Notice, format, v})
+		h.Log(NewRecord(Notice, format, v))
 	}
 }
 
 func (l *Logger) Warning(v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Warning, "", v})
+		h.Log(NewRecord(Warning, "", v))
 	}
 }
 
 func (l *Logger) Warningf(format string, v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Warning, format, v})
+		h.Log(NewRecord(Warning, format, v))
 	}
 }
 
 func (l *Logger) Error(v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Error, "", v})
+		h.Log(NewRecord(Error, "", v))
 	}
 }
 
 func (l *Logger) Errorf(format string, v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Error, format, v})
+		h.Log(NewRecord(Error, format, v))
 	}
 }
 
 func (l *Logger) Alert(v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Alert, "", v})
+		h.Log(NewRecord(Alert, "", v))
 	}
 }
 
 func (l *Logger) Alertf(format string, v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Alert, format, v})
+		h.Log(NewRecord(Alert, format, v))
 	}
 }
 
 func (l *Logger) Critical(v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Critical, "", v})
+		h.Log(NewRecord(Critical, "", v))
 	}
 }
 
 func (l *Logger) Criticalf(format string, v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Critical, format, v})
+		h.Log(NewRecord(Critical, format, v))
 	}
 }
 
 func (l *Logger) Emergency(v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Emergency, "", v})
+		h.Log(NewRecord(Emergency, "", v))
 	}
 }
 
 func (l *Logger) Emergencyf(format string, v ...interface{}) {
 	for _, h := range l.handlers {
-		h.Log(&Record{Emergency, format, v})
+		h.Log(NewRecord(Emergency, format, v))
 	}
 }
 
