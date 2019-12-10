@@ -28,12 +28,9 @@ const (
 const LevelAll = ^Level(0)
 
 const (
-	_ int8 = iota
-	TFile
-	TSmart
-	TMultiHandler
+	TFile uint8 = iota
 	TBare
-	TSmartBare
+	TMultiHandler
 )
 
 var (

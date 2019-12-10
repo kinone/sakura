@@ -40,10 +40,11 @@ type LevelLogger interface {
 }
 
 type Option struct {
-	Type     int8
-	File     string
-	Levels   []string
-	Handlers []*HandlerOption
+	Type         uint8
+	File         string
+	Levels       []string
+	Handlers     []*HandlerOption
+	PreventSmart bool
 }
 
 type Logger struct {
@@ -61,33 +62,24 @@ func NewLogger(opt *Option) (l *Logger) {
 		opt = &Option{}
 	}
 
-	if opt.Type == 0 {
-		opt.Type = TSmart
-	}
-
 	l = NewNullLogger()
 
 	switch opt.Type {
 	case TFile:
 		l.AddHandler(NewLevelHandler(opt.File, opt.Levels...))
-	case TSmart:
-		l.AddHandler(NewSmartHandler(NewLevelHandler(opt.File, opt.Levels...)))
+	case TBare:
+		l.AddHandler(NewBareHandler(opt.File))
 	case TMultiHandler:
 		for _, v := range opt.Handlers {
 			h := NewLevelHandler(v.File, v.Levels...)
-			switch v.Type {
-			case "file":
-				l.AddHandler(h)
-			case "smart":
-				l.AddHandler(NewSmartHandler(h))
-			default:
-				l.AddHandler(NewSmartHandler(h))
-			}
+			l.AddHandler(h)
 		}
-	case TBare:
-		l.AddHandler(NewBareHandler(opt.File))
-	case TSmartBare:
-		l.AddHandler(NewSmartHandler(NewBareHandler(opt.File)))
+	}
+
+	if !opt.PreventSmart {
+		for k, v := range l.handlers {
+			l.handlers[k] = NewSmartHandler(v)
+		}
 	}
 
 	return

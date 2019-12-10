@@ -34,7 +34,6 @@ func LevelFilter(level ...string) Filter {
 }
 
 type HandlerOption struct {
-	Type   string
 	File   string
 	Levels []string
 }
