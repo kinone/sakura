@@ -1,6 +1,7 @@
 package mlog
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 	"sync"
@@ -141,6 +142,37 @@ func (h *FileHandler) init() (err error) {
 	}
 
 	return
+}
+
+type JsonHandler struct {
+	Handler
+}
+
+func NewJsonHandler(handler Handler) (h *JsonHandler) {
+	h = &JsonHandler{handler}
+
+	return
+}
+
+func (h *JsonHandler) Log(r *Record) {
+	r.format = "%s"
+	var (
+		data []byte
+		err  error
+	)
+
+	if len(r.args) > 1 {
+		data, err = json.Marshal(r.args)
+	} else {
+		data, err = json.Marshal(r.args[0])
+	}
+
+	if nil != err {
+		data = []byte("<json format error>")
+	}
+
+	r.args = Args{string(data)}
+	h.Handler.Log(r)
 }
 
 type SmartHandler struct {

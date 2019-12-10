@@ -45,6 +45,7 @@ type Option struct {
 	Levels       []string
 	Handlers     []*HandlerOption
 	PreventSmart bool
+	Json         bool
 }
 
 type Logger struct {
@@ -73,6 +74,12 @@ func NewLogger(opt *Option) (l *Logger) {
 		for _, v := range opt.Handlers {
 			h := NewLevelHandler(v.File, v.Levels...)
 			l.AddHandler(h)
+		}
+	}
+
+	if opt.Json {
+		for k, v := range l.handlers {
+			l.handlers[k] = NewJsonHandler(v)
 		}
 	}
 
