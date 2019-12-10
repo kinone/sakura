@@ -48,6 +48,7 @@ var (
 
 	levelString = map[string]Level{
 		"debug":     Debug,
+		"debug+":    LevelAll,
 		"info":      Info,
 		"info+":     ^Debug,
 		"notice":    Notice,

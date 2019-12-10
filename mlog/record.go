@@ -2,7 +2,6 @@ package mlog
 
 import (
 	"encoding/json"
-	"strings"
 )
 
 type Args []interface{}
@@ -21,10 +20,8 @@ func (r *Record) Args() Args {
 	return r.args
 }
 
-func (r *Record) Level() string {
-	l := r.level.String()
-
-	return strings.ToLower(l[1 : len(l)-1])
+func (r *Record) Level() Level {
+	return r.level
 }
 
 func (r *Record) Format() string {
@@ -39,11 +36,11 @@ func (r *Record) SetArgs(args Args) {
 	r.args = args
 }
 
-func (r *Record) SetLevel(l string) {
-	r.level = NewLevel(l)
+func (r *Record) SetLevel(l Level) {
+	r.level = l
 }
 
-func (r *Record) Json() *Record {
+func (r *Record) Json() (nr *Record) {
 	l := len(r.args)
 	if l == 0 {
 		return r
@@ -64,8 +61,7 @@ func (r *Record) Json() *Record {
 		data = []byte("<Json format error>")
 	}
 
-	r.format = "%s"
-	r.args = Args{string(data)}
+	nr = NewRecord(r.level, "%s", Args{string(data)})
 
-	return r
+	return
 }
