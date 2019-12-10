@@ -17,14 +17,7 @@ type Wrapper struct {
 
 func NewWrapper() (w *Wrapper) {
 	ch := make(chan os.Signal, 1)
-	signal.Notify(
-		ch,
-		syscall.SIGTERM,
-		syscall.SIGINT,
-		syscall.SIGHUP,
-		syscall.SIGUSR1,
-		syscall.SIGUSR2,
-	)
+	signal.Notify(ch)
 
 	w = &Wrapper{
 		sigC:       ch,
