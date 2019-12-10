@@ -1,38 +1,10 @@
 package mlog
 
 import (
-	"encoding/json"
 	"log"
 	"os"
 	"sync"
 )
-
-type Args []interface{}
-
-type Record struct {
-	level  Level
-	format string
-	args   Args
-}
-
-type Filter func(*Record) bool
-
-func LevelFilter(level ...string) Filter {
-	var mask Level
-
-	if len(level) == 0 {
-		mask = LevelAll
-	} else {
-		for _, v := range level {
-			mask |= NewLevel(v)
-		}
-	}
-
-	return func(r *Record) (e bool) {
-		e = r.level&mask > 0
-		return
-	}
-}
 
 type HandlerOption struct {
 	File   string
@@ -155,24 +127,7 @@ func NewJsonHandler(handler Handler) (h *JsonHandler) {
 }
 
 func (h *JsonHandler) Log(r *Record) {
-	r.format = "%s"
-	var (
-		data []byte
-		err  error
-	)
-
-	if len(r.args) > 1 {
-		data, err = json.Marshal(r.args)
-	} else {
-		data, err = json.Marshal(r.args[0])
-	}
-
-	if nil != err {
-		data = []byte("<json format error>")
-	}
-
-	r.args = Args{string(data)}
-	h.Handler.Log(r)
+	h.Handler.Log(r.Json())
 }
 
 type SmartHandler struct {
