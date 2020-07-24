@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"os"
+	"os/signal"
 	"reflect"
 	"strings"
+	"syscall"
 )
 
 type Sakura struct {
@@ -43,6 +46,13 @@ func LocalIP() (ips []string, err error) {
 	}
 
 	return
+}
+
+func NewStopSignal() chan os.Signal {
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+
+	return ch
 }
 
 func HttpBuildQuery(params map[string][]string) string {
