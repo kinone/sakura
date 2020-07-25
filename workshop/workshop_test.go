@@ -8,20 +8,42 @@ import (
 	"time"
 )
 
+type Point struct {
+	X int
+	Y int
+}
+
+func (p *Point) String() string {
+	return fmt.Sprintf("(%d, %d)", p.X, p.Y)
+}
+
 func TestWorkshop_Do(t *testing.T) {
-	Logger = mlog.NewLogger(nil)
+	count := 20
+
+	Logger = mlog.NewLogger(&mlog.Option{
+		Levels: []string{"info+"},
+	})
 	defer Logger.Close()
 
+	res := make([]*Point, count)
 	ws := Open(10)
-	defer ws.Close()
+	defer func() {
+		ws.Close()
+		for _, v := range res {
+			Logger.Infof("%s\n", v)
+		}
+	}()
 
-	hello := func(i int) {
-		time.Sleep(time.Second * time.Duration(rand.Intn(3)))
-		fmt.Println("Hello ", i)
+	processer := func(f *Point) {
+		r := rand.Intn(3)
+		f.Y = f.X + r
+		fmt.Println("Process ", f.X)
+		time.Sleep(time.Second * time.Duration(r))
 	}
 
-	for i := 0; i <= 20; i++ {
-		job, _ := NewSimpleJob(hello, i)
+	for i := 0; i < count; i++ {
+		res[i] = &Point{X: i}
+		job, _ := NewSimpleJob(processer, res[i])
 		ws.Do(job)
 	}
 }
