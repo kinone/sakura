@@ -2,8 +2,11 @@ package workshop
 
 import (
 	"context"
+	"github.com/kinone/sakura/mlog"
 	"sync"
 )
+
+var Logger mlog.LevelLogger = mlog.NewNullLogger()
 
 type Workshop struct {
 	pipe  chan Job
@@ -21,10 +24,10 @@ func Open(hc int) (w *Workshop) {
 
 	for i := 0; i < hc; i++ {
 		w.wg.Add(1)
-		go func() {
+		go func(id int) {
 			defer w.wg.Done()
-			NewWorker(ctx, w.pipe).Start()
-		}()
+			NewWorker(id, w.pipe).Start(ctx)
+		}(i)
 	}
 
 	return

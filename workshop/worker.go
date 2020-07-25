@@ -3,25 +3,28 @@ package workshop
 import "context"
 
 type Worker struct {
+	id   int
 	pipe <-chan Job
-	ctx  context.Context
 }
 
-func NewWorker(ctx context.Context, pipe <-chan Job) (w *Worker) {
+func NewWorker(id int, pipe <-chan Job) (w *Worker) {
 	w = &Worker{
+		id:   id,
 		pipe: pipe,
-		ctx:  ctx,
 	}
 
 	return
 }
 
-func (w *Worker) Start() {
+func (w *Worker) Start(ctx context.Context) {
+	defer Logger.Debugf("Worker %d stopped", w.id)
+	Logger.Debugf("Workder %d started", w.id)
+
 	for {
 		select {
 		case job := <-w.pipe:
 			job.Process()
-		case <-w.ctx.Done():
+		case <-ctx.Done():
 			return
 		}
 	}

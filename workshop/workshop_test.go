@@ -2,12 +2,16 @@ package workshop
 
 import (
 	"fmt"
+	"github.com/kinone/sakura/mlog"
 	"math/rand"
 	"testing"
 	"time"
 )
 
 func TestWorkshop_Do(t *testing.T) {
+	Logger = mlog.NewLogger(nil)
+	defer Logger.Close()
+
 	ws := Open(10)
 	defer ws.Close()
 
