@@ -34,16 +34,16 @@ func TestWorkshop_Do(t *testing.T) {
 		}
 	}()
 
-	processer := func(f *Point) {
+	processor := func(f *Point) {
 		r := rand.Intn(3)
 		f.Y = f.X + r
-		fmt.Println("Process ", f.X)
 		time.Sleep(time.Second * time.Duration(r))
+		fmt.Println("processed ", f.X)
 	}
 
 	for i := 0; i < count; i++ {
 		res[i] = &Point{X: i}
-		job, _ := NewSimpleJob(processer, res[i])
+		job, _ := NewSimpleJob(processor, res[i])
 		ws.Do(job)
 	}
 }
