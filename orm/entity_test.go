@@ -35,7 +35,7 @@ func (r *Rows) Columns() (cols []string, err error) {
 }
 
 type Foo struct {
-	*Dao
+	*Entity
 	ID   uint32 `db:"id"`
 	Name string `db:"name"`
 	Age  uint8  `db:"age"`
@@ -43,7 +43,7 @@ type Foo struct {
 
 func NewFoo() (f *Foo) {
 	f = &Foo{
-		Dao: NewDao(),
+		Entity: NewEntity(),
 	}
 
 	f.SetCurrent(f)

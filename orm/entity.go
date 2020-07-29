@@ -15,46 +15,46 @@ type RowsInterface interface {
 	Columns() ([]string, error)
 }
 
-type DaoInterface interface {
+type EntityInterface interface {
 	AllFields() map[string]string
 	FieldPtr([]string) []interface{}
 	Load(r RowsInterface) error
 	LoadRow(RowInterface, []string) error
-	SetCurrent(DaoInterface)
+	SetCurrent(EntityInterface)
 }
 
-type Dao struct {
-	current DaoInterface
+type Entity struct {
+	current EntityInterface
 }
 
-func NewDao() (d *Dao) {
-	d = &Dao{}
+func NewEntity() (e *Entity) {
+	e = &Entity{}
 
 	return
 }
 
-func (d *Dao) SetCurrent(c DaoInterface) {
-	d.current = c
+func (e *Entity) SetCurrent(c EntityInterface) {
+	e.current = c
 }
 
-func (d *Dao) Load(r RowsInterface) (err error) {
+func (e *Entity) Load(r RowsInterface) (err error) {
 	var cols []string
 
 	if cols, err = r.Columns(); nil != err {
 		return
 	}
 
-	err = r.Scan(d.FieldPtr(cols)...)
+	err = r.Scan(e.FieldPtr(cols)...)
 
 	return
 }
 
-func (d *Dao) LoadRow(r RowInterface, cols []string) error {
-	return r.Scan(d.FieldPtr(cols)...)
+func (e *Entity) LoadRow(r RowInterface, cols []string) error {
+	return r.Scan(e.FieldPtr(cols)...)
 }
 
-func (d *Dao) AllFields() (m map[string]string) {
-	rtt := reflect.TypeOf(d.current).Elem()
+func (e *Entity) AllFields() (m map[string]string) {
+	rtt := reflect.TypeOf(e.current).Elem()
 	m = make(map[string]string)
 	for i := 0; i < rtt.NumField(); i++ {
 		f := rtt.Field(i)
@@ -70,9 +70,9 @@ func (d *Dao) AllFields() (m map[string]string) {
 	return
 }
 
-func (d *Dao) FieldPtr(cols []string) (r []interface{}) {
-	m := d.current.AllFields()
-	rvt := reflect.ValueOf(d.current).Elem()
+func (e *Entity) FieldPtr(cols []string) (r []interface{}) {
+	m := e.current.AllFields()
+	rvt := reflect.ValueOf(e.current).Elem()
 	for _, col := range cols {
 		var (
 			name string
