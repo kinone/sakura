@@ -5,12 +5,40 @@ import (
 	"testing"
 )
 
+type Row struct {
+}
+
+func (r *Row) Scan(ptrs ...interface{}) error {
+	for _, v := range ptrs {
+		switch v.(type) {
+		case *uint32:
+			*v.(*uint32) = 1001
+		case *string:
+			*v.(*string) = "zhenhao"
+		case *uint8:
+			*v.(*uint8) = 25
+
+		}
+	}
+
+	return nil
+}
+
+type Rows struct {
+	*Row
+}
+
+func (r *Rows) Columns() (cols []string, err error) {
+	cols = []string{"id", "name", "age"}
+
+	return
+}
+
 type Foo struct {
 	*Dao
-	ID      uint32 `db:"id"`
-	Name    string `db:"name"`
-	Age     uint8  `db:"age"`
-	Created string `db:"created"`
+	ID   uint32 `db:"id"`
+	Name string `db:"name"`
+	Age  uint8  `db:"age"`
 }
 
 func NewFoo() (f *Foo) {
@@ -27,16 +55,18 @@ func TestDao_AllFields(t *testing.T) {
 	fmt.Println(NewFoo().AllFields())
 }
 
-func TestDao_FieldPtr(t *testing.T) {
+func TestDao_Load(t *testing.T) {
 	f := NewFoo()
-	ptrs := f.FieldPtr([]string{"id", "name", "age"})
 
-	id := ptrs[0].(*uint32)
-	*id = 1001
-	name := ptrs[1].(*string)
-	*name = "zhenhao"
-	age := ptrs[2].(*uint8)
-	*age = 25
+	_ = f.Load(&Rows{})
+
+	fmt.Println(f)
+}
+
+func TestDao_LoadRow(t *testing.T) {
+	f := NewFoo()
+
+	_ = f.LoadRow(&Row{}, []string{"name", "age"})
 
 	fmt.Println(f)
 }

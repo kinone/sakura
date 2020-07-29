@@ -11,6 +11,15 @@ type DaoInterface interface {
 	FieldPtr([]string) []interface{}
 }
 
+type RowInterface interface {
+	Scan(...interface{}) error
+}
+
+type RowsInterface interface {
+	RowInterface
+	Columns() ([]string, error)
+}
+
 type Dao struct {
 	current DaoInterface
 }
@@ -23,6 +32,22 @@ func NewDao() (d *Dao) {
 
 func (d *Dao) SetCurrent(c DaoInterface) {
 	d.current = c
+}
+
+func (d *Dao) Load(r RowsInterface) (err error) {
+	var cols []string
+
+	if cols, err = r.Columns(); nil != err {
+		return
+	}
+
+	err = r.Scan(d.FieldPtr(cols)...)
+
+	return
+}
+
+func (d *Dao) LoadRow(r RowInterface, cols []string) error {
+	return r.Scan(d.FieldPtr(cols)...)
 }
 
 func (d *Dao) AllFields() (m map[string]string) {
