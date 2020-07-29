@@ -6,11 +6,6 @@ import (
 	"unsafe"
 )
 
-type DaoInterface interface {
-	AllFields() map[string]string
-	FieldPtr([]string) []interface{}
-}
-
 type RowInterface interface {
 	Scan(...interface{}) error
 }
@@ -18,6 +13,14 @@ type RowInterface interface {
 type RowsInterface interface {
 	RowInterface
 	Columns() ([]string, error)
+}
+
+type DaoInterface interface {
+	AllFields() map[string]string
+	FieldPtr([]string) []interface{}
+	Load(r RowsInterface) error
+	LoadRow(RowInterface, []string) error
+	SetCurrent(DaoInterface)
 }
 
 type Dao struct {
