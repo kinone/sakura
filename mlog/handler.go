@@ -21,6 +21,7 @@ type FileHandler struct {
 	filename  string
 	filter    []Filter
 	driver    *log.Logger
+	flag      int
 	fh        *os.File
 	showLevel bool
 }
@@ -28,6 +29,7 @@ type FileHandler struct {
 func NewFileHandler(file string) (h *FileHandler) {
 	h = &FileHandler{
 		filename: file,
+		flag:     log.LstdFlags,
 	}
 
 	if err := h.init(); nil != err {
@@ -39,7 +41,8 @@ func NewFileHandler(file string) (h *FileHandler) {
 
 func NewBareHandler(file string) (h *FileHandler) {
 	h = NewFileHandler(file)
-	h.driver.SetFlags(0)
+	h.flag = 0
+	h.driver.SetFlags(h.flag)
 
 	return
 }
@@ -108,9 +111,9 @@ func (h *FileHandler) init() (err error) {
 	}
 
 	if nil != h.fh {
-		h.driver = log.New(h.fh, "", log.LstdFlags)
+		h.driver = log.New(h.fh, "", h.flag)
 	} else {
-		h.driver = log.New(os.Stdout, "", log.LstdFlags)
+		h.driver = log.New(os.Stdout, "", h.flag)
 	}
 
 	return
