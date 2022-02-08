@@ -90,9 +90,12 @@ func (h *FileHandler) Reload() (err error) {
 		return
 	}
 
-	if err = h.fh.Close(); nil != err {
-		return
-	}
+	old := h.fh
+	defer func() { // file changed
+		if nil != old && nil == err {
+			err = old.Close()
+		}
+	}()
 
 	return h.init()
 }
